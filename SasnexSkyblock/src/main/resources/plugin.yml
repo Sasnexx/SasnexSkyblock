@@ -1,0 +1,9 @@
+name: SasnexSkyblock
+main: de.sasnex.sasnexskyblock.SasnexSkyblock
+version: 1.0
+api-version: "1.21"
+depend: [FastAsyncWorldEdit]
+
+commands:
+  is:
+    description: Skyblock command
