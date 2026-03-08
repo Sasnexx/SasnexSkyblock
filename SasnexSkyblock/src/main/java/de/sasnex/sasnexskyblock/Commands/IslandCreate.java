@@ -7,31 +7,44 @@ import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
+import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import de.sasnex.sasnexskyblock.Filemanager.FileManager;
 import de.sasnex.sasnexskyblock.GUIS.GUI;
 import de.sasnex.sasnexskyblock.Interfaces.ICommands;
+import de.sasnex.sasnexskyblock.Listeners.MiningListener;
 import de.sasnex.sasnexskyblock.SasnexSkyblock;
-import com.sk89q.worldedit.function.operation.Operation;
 import de.sasnex.sasnexskyblock.Utils.VaultSystem;
 import org.bukkit.Bukkit;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class IslandCreate implements CommandExecutor, ICommands {
+    private static final Map<UUID, UUID> WORKER_VILLAGER = new HashMap<>();
+    private static final Map<UUID, Integer> WORKER_TASK = new HashMap<>();
 
     FileManager fm = new FileManager();
     GUI gui = new GUI();
@@ -51,21 +64,20 @@ public class IslandCreate implements CommandExecutor, ICommands {
                 double z = SasnexSkyblock.getFileManager().getIslandCFG().getDouble("islands." + player.getUniqueId() + ".z");
                 World islandWorld = Bukkit.getWorld("SasnexSkyblock");
                 if (islandWorld == null) {
-                    player.sendMessage("§cFehler: Welt SasnexSkyblock konnte nicht geladen werden.");
+                    player.sendMessage(SasnexSkyblock.color("&cFehler: Welt SasnexSkyblock konnte nicht geladen werden."));
                     return true;
                 }
                 player.teleport(new Location(islandWorld, x, 100, z).add(0.5, 2, 0.5));
-                player.sendMessage("§8[§bSasnexSkyblock§8] §7Willkommen zurück auf deiner Insel!");
+                player.sendMessage(SasnexSkyblock.color(SasnexSkyblock.PREFIX + "&7Willkommen zurueck auf deiner Insel!"));
             } else {
-                player.sendMessage("§cDu hast noch keine Insel. Nutze /is create.");
+                player.sendMessage(SasnexSkyblock.color("&cDu hast noch keine Insel. Nutze /is create."));
             }
             return true;
         }
 
-        if (args.length > 0 && args[0].equalsIgnoreCase("create")) {
+        if (args[0].equalsIgnoreCase("create")) {
             if (SasnexSkyblock.getFileManager().getIslandCFG().contains("islands." + player.getUniqueId())) {
-                player.sendMessage("§8[§bSasnexSkyblock§8] §cDu hast bereits eine Insel.");
-
+                player.sendMessage(SasnexSkyblock.color(SasnexSkyblock.PREFIX + "&cDu hast bereits eine Insel."));
                 return true;
             }
             createIsland(player);
@@ -73,39 +85,155 @@ public class IslandCreate implements CommandExecutor, ICommands {
             return true;
         }
 
-        if (args.length > 0 && args[0].equalsIgnoreCase("money")) {
+        if (args[0].equalsIgnoreCase("money")) {
             int money = SasnexSkyblock.getVaultSystem().getBalance(player);
-            player.sendMessage("§8[§bSasnexSkyblock§8] §7Du hast §a"+money+"§7€.");
-        }
-
-        if (args.length > 0 && args[0].equalsIgnoreCase("delete")) {
-            SasnexSkyblock.getFileManager().setPlayersData("island." + player.getUniqueId(), false);
-            // hier muss die methode hin wo das gespawnte schematic löscht
+            player.sendMessage(SasnexSkyblock.color(SasnexSkyblock.PREFIX + "&7Du hast &a" + money + "&7€."));
             return true;
         }
 
-        if(args.length > 0 && args[0].equalsIgnoreCase("shop")){
-            gui.IslandShopGUI(player);
+        if (args[0].equalsIgnoreCase("delete")) {
+            SasnexSkyblock.getFileManager().setPlayersData("island." + player.getUniqueId(), false);
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("shop")) {
+            gui.openMainShop(player);
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("arbeiter") || args[0].equalsIgnoreCase("worker")) {
+            if (args.length >= 2 && (args[1].equalsIgnoreCase("abbruch")
+                    || args[1].equalsIgnoreCase("stop")
+                    || args[1].equalsIgnoreCase("remove"))) {
+                if (stopWorker(player.getUniqueId())) {
+                    player.sendMessage(SasnexSkyblock.color(SasnexSkyblock.PREFIX + "&7Worker wurde gestoppt."));
+                } else {
+                    player.sendMessage(SasnexSkyblock.color(SasnexSkyblock.PREFIX + "&7Du hast aktuell keinen Worker."));
+                }
+                return true;
+            }
+
+            spawnWorker(player);
+            return true;
         }
 
         return false;
+    }
+
+    private void spawnWorker(Player player) {
+        stopWorker(player.getUniqueId());
+
+        Villager villager = player.getWorld().spawn(player.getLocation(), Villager.class);
+        villager.setCustomName(SasnexSkyblock.color("&aRaven"));
+        villager.setCustomNameVisible(true);
+        villager.setAI(false);
+        villager.setInvulnerable(true);
+        villager.setRotation(player.getLocation().getYaw(), player.getLocation().getPitch());
+
+        WORKER_VILLAGER.put(player.getUniqueId(), villager.getUniqueId());
+        player.sendMessage(SasnexSkyblock.color(SasnexSkyblock.PREFIX + "&7Raven gespawnt. Nutze /is arbeiter abbruch zum Stoppen."));
+        startWorkerTask(villager, player);
+    }
+
+    private void startWorkerTask(Villager villager, Player owner) {
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(SasnexSkyblock.getInstance(), () -> {
+            if (!villager.isValid() || !owner.isOnline()) {
+                stopWorker(owner.getUniqueId());
+                return;
+            }
+
+            if (!"SasnexSkyblock".equals(owner.getWorld().getName())) {
+                return;
+            }
+
+            Location eye = villager.getEyeLocation();
+            RayTraceResult hit = owner.getWorld().rayTraceBlocks(
+                    eye,
+                    eye.getDirection(),
+                    6.0,
+                    FluidCollisionMode.NEVER,
+                    true
+            );
+
+            if (hit == null || hit.getHitBlock() == null) {
+                return;
+            }
+
+            Block target = hit.getHitBlock();
+            if (target.getType().isAir()) {
+                return;
+            }
+
+            Material minedType = target.getType();
+            if (target.breakNaturally()) {
+                MiningListener.handleMine(owner, minedType);
+            }
+        }, 20L, 20L);
+
+        WORKER_TASK.put(owner.getUniqueId(), task.getTaskId());
+    }
+
+    public static boolean stopWorker(UUID ownerUuid) {
+        boolean removed = false;
+
+        Integer taskId = WORKER_TASK.remove(ownerUuid);
+        if (taskId != null) {
+            Bukkit.getScheduler().cancelTask(taskId);
+            removed = true;
+        }
+
+        UUID villagerUuid = WORKER_VILLAGER.remove(ownerUuid);
+        if (villagerUuid != null) {
+            Entity entity = findEntity(villagerUuid);
+            if (entity instanceof Villager villager && villager.isValid()) {
+                villager.remove();
+                removed = true;
+            }
+        }
+
+        return removed;
+    }
+
+    public static void stopAllWorkers() {
+        for (UUID ownerUuid : WORKER_TASK.keySet().toArray(new UUID[0])) {
+            stopWorker(ownerUuid);
+        }
+        for (UUID ownerUuid : WORKER_VILLAGER.keySet().toArray(new UUID[0])) {
+            stopWorker(ownerUuid);
+        }
+    }
+
+    public static boolean stopWorkerByVillager(UUID villagerUuid) {
+        for (Map.Entry<UUID, UUID> entry : WORKER_VILLAGER.entrySet()) {
+            if (entry.getValue().equals(villagerUuid)) {
+                return stopWorker(entry.getKey());
+            }
+        }
+        return false;
+    }
+
+    private static Entity findEntity(UUID entityUuid) {
+        for (World world : Bukkit.getWorlds()) {
+            Entity entity = world.getEntity(entityUuid);
+            if (entity != null) return entity;
+        }
+        return null;
     }
 
     @Deprecated
     private void createIsland(Player player) {
         World islandWorld = Bukkit.getWorld("SasnexSkyblock");
         if (islandWorld == null) {
-            player.sendMessage("§cFehler: Welt SasnexSkyblock konnte nicht geladen werden.");
+            player.sendMessage(SasnexSkyblock.color("&cFehler: Welt SasnexSkyblock konnte nicht geladen werden."));
             return;
         }
 
-        //Prüfen ob der Spiener ne Insel hat (Was bei neuen Spieler nicht der Fall ist lol)
         if (SasnexSkyblock.getFileManager().getIslandCFG().contains("islands." + player.getUniqueId())) {
             double x = SasnexSkyblock.getFileManager().getIslandCFG().getDouble("islands." + player.getUniqueId() + ".x");
             double z = SasnexSkyblock.getFileManager().getIslandCFG().getDouble("islands." + player.getUniqueId() + ".z");
 
             player.teleport(new Location(islandWorld, x, 100, z).add(0.5, 2, 0.5));
-            player.sendMessage("§aWillkommen zurück auf deiner Insel!");
+            player.sendMessage(SasnexSkyblock.color("&aWillkommen zurueck auf deiner Insel!"));
             return;
         }
 
@@ -116,17 +244,16 @@ public class IslandCreate implements CommandExecutor, ICommands {
 
         File schematicFile = new File(SasnexSkyblock.getFileManager().getSchematicsFolder(), "island.schem");
         if (!schematicFile.exists()) {
-            player.sendMessage("§cFehler: island.schem wurde nicht im Ordner gefunden!");
+            player.sendMessage(SasnexSkyblock.color("&cFehler: island.schem wurde nicht im Ordner gefunden!"));
             return;
         }
 
         Location centerLoc;
 
-
         try {
             centerLoc = createSchem(schematicFile, spawnLoc);
         } catch (RuntimeException e) {
-            player.sendMessage("§cFehler beim Einfügen der Insel: " + e.getMessage());
+            player.sendMessage(SasnexSkyblock.color("&cFehler beim Einfuegen der Insel: " + e.getMessage()));
             return;
         }
 
@@ -134,12 +261,12 @@ public class IslandCreate implements CommandExecutor, ICommands {
         SasnexSkyblock.getFileManager().getIslandCFG().set("islands." + player.getUniqueId() + ".z", centerLoc.getZ());
         SasnexSkyblock.getFileManager().getIslandCFG().set("island-index", index + 1);
         SasnexSkyblock.getFileManager().saveislandCFG();
-        // 6. Finaler Teleport (1 Tick Verzögerung, damit der Paste sicher fertig ist)
+
         Bukkit.getScheduler().runTaskLater(
                 SasnexSkyblock.getInstance(),
                 () -> {
                     player.teleport(centerLoc.clone().add(0.5, 2, 0.5));
-                    player.sendMessage("§bDeine Insel wurde erfolgreich erstellt!");
+                    player.sendMessage(SasnexSkyblock.color("&bDeine Insel wurde erfolgreich erstellt!"));
                 },
                 1L
         );
@@ -162,16 +289,12 @@ public class IslandCreate implements CommandExecutor, ICommands {
             double worldCenterX = loc.getBlockX() + (centerX - origin.getX());
             double worldCenterZ = loc.getBlockZ() + (centerZ - origin.getZ());
             try (EditSession editSession = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(loc.getWorld()))) {
-
-                // 3. Die Operation vorbereiten
                 Operation operation = new ClipboardHolder(clipboard)
                         .createPaste(editSession)
                         .to(BlockVector3.at(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()))
-                        // Falls deine Schematic Luft enthält, die nichts überschreiben soll:
                         .ignoreAirBlocks(true)
                         .build();
 
-                // 4. Die Operation ausführen (Dank FAWE passiert das extrem schnell)
                 Operations.complete(operation);
             }
             return new Location(loc.getWorld(), worldCenterX, loc.getY(), worldCenterZ);
@@ -180,7 +303,3 @@ public class IslandCreate implements CommandExecutor, ICommands {
         }
     }
 }
-
-
-
-

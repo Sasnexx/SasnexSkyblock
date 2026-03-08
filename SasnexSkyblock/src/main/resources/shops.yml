@@ -1,0 +1,312 @@
+﻿shops:
+  hub:
+    title: "§b§lIsland Shop"
+    size: 36
+    items:
+      blocks_button:
+        material: GRASS_BLOCK
+        slot: 12
+        display: "§aBloecke"
+        target-shop: blocks
+        buy-price: 0
+        sell-price: 0
+        buy-amount: 1
+      food_button:
+        material: COOKED_CHICKEN
+        slot: 13
+        display: "§aEssen"
+        target-shop: food
+        buy-price: 0
+        sell-price: 0
+        buy-amount: 1
+      sword_button:
+        material: DIAMOND_SWORD
+        slot: 14
+        display: "§aTest"
+        target-shop: test
+        buy-price: 0
+        sell-price: 0
+        buy-amount: 1
+
+  blocks:
+    title: "§b§lMaterial kaufen"
+    size: 54
+    items:
+      grass:
+        material: GRASS_BLOCK
+        slot: 10
+        display: "§9Grass Block"
+        buy-price: 100
+        sell-price: 15
+        buy-amount: 2
+      dirt:
+        material: DIRT
+        slot: 11
+        display: "§9Erde"
+        buy-price: 100
+        sell-price: 10
+        buy-amount: 2
+      gravel:
+        material: GRAVEL
+        slot: 12
+        display: "§9Kies"
+        buy-price: 100
+        sell-price: 10
+        buy-amount: 2
+      granite:
+        material: GRANITE
+        slot: 13
+        display: "§9Granit"
+        buy-price: 100
+        sell-price: 16
+        buy-amount: 2
+      diorite:
+        material: DIORITE
+        slot: 14
+        display: "§9Diorit"
+        buy-price: 100
+        sell-price: 16
+        buy-amount: 2
+      andesite:
+        material: ANDESITE
+        slot: 15
+        display: "§9Andesit"
+        buy-price: 100
+        sell-price: 16
+        buy-amount: 2
+      oak_log:
+        material: OAK_LOG
+        slot: 16
+        display: "§9Eichen Stamm"
+        buy-price: 100
+        sell-price: 16
+        buy-amount: 2
+      spruce_log:
+        material: SPRUCE_LOG
+        slot: 19
+        display: "§9Fichten Stamm"
+        buy-price: 100
+        sell-price: 16
+        buy-amount: 2
+      birch_log:
+        material: BIRCH_LOG
+        slot: 20
+        display: "§9Birken Stamm"
+        buy-price: 100
+        sell-price: 16
+        buy-amount: 2
+      jungle_log:
+        material: JUNGLE_LOG
+        slot: 21
+        display: "§9Tropen Stamm"
+        buy-price: 100
+        sell-price: 16
+        buy-amount: 2
+      acacia_log:
+        material: ACACIA_LOG
+        slot: 22
+        display: "§9Akazien Stamm"
+        buy-price: 100
+        sell-price: 16
+        buy-amount: 2
+      dark_oak_log:
+        material: DARK_OAK_LOG
+        slot: 23
+        display: "§9Dunkler Eichenstamm"
+        buy-price: 100
+        sell-price: 16
+        buy-amount: 2
+      snow_block:
+        material: SNOW_BLOCK
+        slot: 24
+        display: "§9Schnee-Block"
+        buy-price: 200
+        sell-price: 16
+        buy-amount: 2
+      ice:
+        material: ICE
+        slot: 25
+        display: "§9Eis"
+        buy-price: 200
+        sell-price: 16
+        buy-amount: 2
+      packed_ice:
+        material: PACKED_ICE
+        slot: 28
+        display: "§9Gepacktes Eis"
+        buy-price: 200
+        sell-price: 16
+        buy-amount: 2
+      sponge:
+        material: SPONGE
+        slot: 29
+        display: "§9Schwamm"
+        buy-price: 200
+        sell-price: 16
+        buy-amount: 2
+      sand:
+        material: SAND
+        slot: 30
+        display: "§9Sand"
+        buy-price: 200
+        sell-price: 16
+        buy-amount: 2
+      sandstone:
+        material: SANDSTONE
+        slot: 31
+        display: "§9Sandstein"
+        buy-price: 200
+        sell-price: 16
+        buy-amount: 2
+      clay_ball:
+        material: CLAY_BALL
+        slot: 32
+        display: "§9Lehmkugel"
+        buy-price: 200
+        sell-price: 16
+        buy-amount: 2
+      obsidian:
+        material: OBSIDIAN
+        slot: 33
+        display: "§9Obsidian"
+        buy-price: 200
+        sell-price: 16
+        buy-amount: 2
+      glowstone:
+        material: GLOWSTONE
+        slot: 34
+        display: "§9Glowstone"
+        buy-price: 200
+        sell-price: 16
+        buy-amount: 2
+      end_stone:
+        material: END_STONE
+        slot: 39
+        display: "§9Endstein"
+        buy-price: 200
+        sell-price: 16
+        buy-amount: 2
+      prismarine:
+        material: PRISMARINE
+        slot: 40
+        display: "§9Prismarin"
+        buy-price: 200
+        sell-price: 16
+        buy-amount: 2
+      white_wool:
+        material: WHITE_WOOL
+        slot: 41
+        display: "§9Wolle"
+        buy-price: 200
+        sell-price: 16
+        buy-amount: 2
+      back:
+        material: NETHER_STAR
+        slot: 49
+        display: "§cZurueck"
+        target-shop: hub
+        buy-price: 0
+        sell-price: 0
+        buy-amount: 1
+
+  food:
+    title: "§b§lEssen"
+    size: 36
+    items:
+      apple:
+        material: APPLE
+        slot: 11
+        display: "§9Apfel"
+        buy-price: 70
+        sell-price: 5
+        buy-amount: 2
+      golden_apple:
+        material: GOLDEN_APPLE
+        slot: 12
+        display: "§9Goldener Apfel"
+        buy-price: 70
+        sell-price: 5
+        buy-amount: 2
+      carrot:
+        material: CARROT
+        slot: 13
+        display: "§9Karotte"
+        buy-price: 70
+        sell-price: 5
+        buy-amount: 2
+      bread:
+        material: BREAD
+        slot: 14
+        display: "§9Brot"
+        buy-price: 35
+        sell-price: 10
+        buy-amount: 2
+      baked_potato:
+        material: BAKED_POTATO
+        slot: 15
+        display: "§9Gebackene Kartoffel"
+        buy-price: 35
+        sell-price: 10
+        buy-amount: 2
+      cookie:
+        material: COOKIE
+        slot: 20
+        display: "§9Keks"
+        buy-price: 40
+        sell-price: 10
+        buy-amount: 2
+      mushroom_stew:
+        material: MUSHROOM_STEW
+        slot: 21
+        display: "§9Pilzsuppe"
+        buy-price: 28
+        sell-price: 10
+        buy-amount: 2
+      cooked_salmon:
+        material: COOKED_SALMON
+        slot: 22
+        display: "§9Gekochter Lachs"
+        buy-price: 35
+        sell-price: 10
+        buy-amount: 2
+      cooked_chicken:
+        material: COOKED_CHICKEN
+        slot: 23
+        display: "§9Gekochtes Huhn"
+        buy-price: 50
+        sell-price: 10
+        buy-amount: 2
+      cooked_mutton:
+        material: COOKED_MUTTON
+        slot: 24
+        display: "§9Gekochtes Lamm"
+        buy-price: 60
+        sell-price: 10
+        buy-amount: 2
+      back:
+        material: NETHER_STAR
+        slot: 31
+        display: "§cZurueck"
+        target-shop: hub
+        buy-price: 0
+        sell-price: 0
+        buy-amount: 1
+  test:
+    title: "§5Schwertchen"
+    size: 36
+    items:
+      sword:
+        material: DIAMOND_SWORD
+        slot: 11
+        display: "§9Niggler"
+        buy-price: 300
+        sell-price: 150
+        buy-amount: 1
+      back:
+        material: NETHER_STAR
+        slot: 31
+        display: "§cZurueck"
+        target-shop: hub
+        buy-price: 0
+        sell-price: 0
+        buy-amount: 1

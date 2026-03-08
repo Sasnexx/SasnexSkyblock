@@ -37,4 +37,12 @@ public interface IFileManager {
     File getServerFolder();
 
     File getSchematicsFolder();
+
+    void loadShopCFG();
+
+    void setShopData(String path, Object value);
+
+    void saveShopCFG();
+
+    YamlConfiguration getShopCFG();
 }

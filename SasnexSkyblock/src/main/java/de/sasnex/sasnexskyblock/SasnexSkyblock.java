@@ -2,18 +2,26 @@ package de.sasnex.sasnexskyblock;
 
 import de.sasnex.sasnexskyblock.Commands.IslandCreate;
 import de.sasnex.sasnexskyblock.Filemanager.FileManager;
-import de.sasnex.sasnexskyblock.Listeners.*;
+import de.sasnex.sasnexskyblock.Listeners.CobblestoneGenerator;
+import de.sasnex.sasnexskyblock.Listeners.GuiListener;
+import de.sasnex.sasnexskyblock.Listeners.MiningListener;
+import de.sasnex.sasnexskyblock.Listeners.NormalListener;
+import de.sasnex.sasnexskyblock.Listeners.ShopSignListener;
+import de.sasnex.sasnexskyblock.Listeners.VoidFallTeleport;
+import de.sasnex.sasnexskyblock.Listeners.WorkerListener;
 import de.sasnex.sasnexskyblock.Utils.VaultSystem;
 import de.sasnex.sasnexskyblock.VoidGenerator.VoidGenerator;
-import org.bukkit.WorldCreator;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.WorldCreator;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.checkerframework.checker.units.qual.N;
 
 import java.io.File;
 
 public class SasnexSkyblock extends JavaPlugin {
+
+    public static final String PREFIX = "&9[&7SasnexSkyblock&9] ";
 
     private static SasnexSkyblock instance;
 
@@ -42,6 +50,10 @@ public class SasnexSkyblock extends JavaPlugin {
         if (!new File(dataFolder, "Schematics/island.schem").exists()) {
             saveResource("Schematics/island.schem", false);
         }
+        if (!new File(dataFolder, "shop.yml").exists()) {
+            saveResource("shop.yml", false);
+        }
+
         ensureSkyblockWorld();
         commands();
 
@@ -50,17 +62,20 @@ public class SasnexSkyblock extends JavaPlugin {
         pluginManager.registerEvents(new GuiListener(), this);
         pluginManager.registerEvents(new MiningListener(), this);
         pluginManager.registerEvents(new NormalListener(), this);
+        pluginManager.registerEvents(new WorkerListener(), this);
+        pluginManager.registerEvents(new ShopSignListener(), this);
 
-        Bukkit.getConsoleSender().sendMessage("§8[§bSasnexSkyblock§8] §7Aktiviert");
+        Bukkit.getConsoleSender().sendMessage(color("&8[&bSasnexSkyblock&8] &7Aktiviert"));
     }
 
-    void commands(){
+    void commands() {
         new IslandCreate();
     }
 
     @Override
     public void onDisable() {
-        Bukkit.getConsoleSender().sendMessage("§8[§bSasnexSkyblock§8] §7Deaktiviert!");
+        IslandCreate.stopAllWorkers();
+        Bukkit.getConsoleSender().sendMessage(color("&8[&bSasnexSkyblock&8] &7Deaktiviert!"));
     }
 
     public static SasnexSkyblock getInstance() {
@@ -104,5 +119,14 @@ public class SasnexSkyblock extends JavaPlugin {
 
     public static VaultSystem getVaultSystem() {
         return vm;
+    }
+
+    public static String color(String text) {
+        if (text == null) return null;
+        String normalized = text
+                .replace("\u00C2\u00A7", "&")
+                .replaceAll("\uFFFD([0-9A-FK-ORa-fk-or])", "&$1")
+                .replace('\u00A7', '&');
+        return ChatColor.translateAlternateColorCodes('&', normalized);
     }
 }
